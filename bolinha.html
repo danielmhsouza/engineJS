@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BOLINHA</title>
+    <style>
+        * {
+            padding: 0;
+            margin: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            width: 100%;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        canvas {
+            border: 1px solid black;
+            cursor: grab;
+        }
+    </style>
+</head>
+
+<body>
+    <canvas id="canvas" width="400" height="600"></canvas>
+
+    <script>
+        var cvn = document.querySelector('#canvas');
+        var ctx = cvn.getContext('2d');
+
+        var catx = caty = hp = 0;
+
+        var gravity = 0.1;
+        var ball = {
+            rad: 20,
+            vx: Math.floor(Math.random() * 10 + 1),
+            vy: 0,
+            x: 50,
+            y: 50,
+            color: "#0f0",
+            held: false
+        }
+
+        cvn.addEventListener('mousedown', function (e) {
+            catx = ball.x - e.offsetX;
+            caty = ball.y - e.offsetY;
+            hp = Math.sqrt(Math.pow(catx, 2) + Math.pow(caty, 2));
+
+            if (hp < ball.rad && !ball.held) {
+                ball.held = true;
+                cvn.style.cursor = 'grabbing'
+            }
+
+        }, false)
+
+        cvn.addEventListener('mouseup', function () {
+            if (ball.held) {
+                ball.held = false;
+                ball.vx = Math.floor(Math.random() * 10 + 1);
+                cvn.style.cursor = 'grab'
+            }
+        }, false)
+
+        cvn.addEventListener('mousemove', function (e) {
+            if (ball.held) {
+                ball.x = e.offsetX
+                ball.y = e.offsetY
+            }
+        }, false)
+
+        function update() {
+            if (!ball.held) {
+                ball.vy += gravity;
+                ball.y += ball.vy;
+                ball.x += ball.vx;
+            } else {
+                ball.vy = 0;
+                ball.vx = 0;
+            }
+
+            if (ball.y + ball.rad > cvn.height) {
+                ball.y = cvn.height - ball.rad;
+                ball.vy *= -0.8;
+            }
+
+            if (ball.x - ball.rad < 0 || ball.x + ball.rad > cvn.width) {
+
+                ball.x = ball.x - ball.rad < 0 ? ball.x = ball.rad : ball.x = cvn.width - ball.rad;
+
+                ball.vx *= -0.8;
+            }
+        }
+
+        function render() {
+            ctx.clearRect(0, 0, cvn.width, cvn.height);
+
+            ctx.fillStyle = ball.color;
+            ctx.beginPath();
+            ctx.arc(ball.x, ball.y, ball.rad, 0, 360);
+            ctx.closePath();
+            ctx.fill();
+        }
+
+        function loop() {
+            window.requestAnimationFrame(loop, cvn);
+            update();
+            render();
+        }
+        loop();
+    </script>
+</body>
+
+</html>
